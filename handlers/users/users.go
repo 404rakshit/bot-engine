@@ -1,9 +1,9 @@
 package users
 
 import (
-	userModels "di/models/mongo/users"
-	userServices "di/services/users"
-	"di/utils"
+	userModels "bot-engine/models/mongo/users"
+	userServices "bot-engine/services/users"
+	"bot-engine/utils"
 	"net/http"
 
 	"github.com/gin-gonic/gin"

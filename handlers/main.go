@@ -1,9 +1,9 @@
 package handlers
 
 import (
-	"di/services"
+	"bot-engine/services"
 
-	userHandlers "di/handlers/users"
+	userHandlers "bot-engine/handlers/users"
 )
 
 type Handlers struct {

@@ -1,7 +1,7 @@
 package auth
 
 import (
-	"di/utils"
+	"bot-engine/utils"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -36,7 +36,7 @@ func (a *authMiddleware) ValidateRequest() gin.HandlerFunc {
 // package auth
 
 // import (
-// 	"di/utils"
+// 	"bot-engine/utils"
 // 	"net/http"
 
 // 	"github.com/gin-gonic/gin"

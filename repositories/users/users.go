@@ -1,8 +1,8 @@
 package users
 
 import (
+	userModels "bot-engine/models/mongo/users"
 	"context"
-	userModels "di/models/mongo/users"
 	"time"
 
 	"go.mongodb.org/mongo-driver/v2/bson"

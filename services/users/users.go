@@ -1,9 +1,9 @@
 package users
 
 import (
+	userModels "bot-engine/models/mongo/users"
+	userRepos "bot-engine/repositories/users"
 	"context"
-	userModels "di/models/mongo/users"
-	userRepos "di/repositories/users"
 )
 
 type userRepo = userRepos.UserRepository

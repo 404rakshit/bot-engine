@@ -1,12 +1,12 @@
 package routes
 
 import (
-	"di/handlers"
-	middleware "di/middlewares"
-	"di/utils"
+	"bot-engine/handlers"
+	middleware "bot-engine/middlewares"
+	"bot-engine/utils"
 	"net/http"
 
-	userRoutes "di/routes/users"
+	userRoutes "bot-engine/routes/users"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"

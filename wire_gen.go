@@ -7,12 +7,13 @@
 package main
 
 import (
-	"di/db"
-	"di/handlers"
-	"di/middlewares"
-	"di/repositories"
-	"di/routes"
-	"di/services"
+	"bot-engine/db"
+	"bot-engine/handlers"
+	"bot-engine/repositories"
+	"bot-engine/routes"
+	"bot-engine/services"
+	middleware "di/middlewares"
+
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )

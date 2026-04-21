@@ -1,7 +1,7 @@
 package users
 
 import (
-	baseModels "di/models/mongo"
+	baseModels "bot-engine/models/mongo"
 	"fmt"
 )
 

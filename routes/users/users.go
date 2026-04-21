@@ -1,7 +1,7 @@
 package users
 
 import (
-	userHandler "di/handlers/users"
+	userHandler "bot-engine/handlers/users"
 
 	"github.com/gin-gonic/gin"
 )

@@ -1,8 +1,8 @@
 package services
 
 import (
-	"di/repositories"
-	"di/services/users"
+	"bot-engine/repositories"
+	"bot-engine/services/users"
 )
 
 type Services struct {

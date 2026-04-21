@@ -1,7 +1,7 @@
 package repositories
 
 import (
-	"di/repositories/users"
+	"bot-engine/repositories/users"
 
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )

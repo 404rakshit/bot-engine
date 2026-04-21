@@ -1,7 +1,7 @@
 package main
 
 import (
-	"di/clients"
+	"bot-engine/clients"
 	"log"
 )
 

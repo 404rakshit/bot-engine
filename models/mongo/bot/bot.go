@@ -1,31 +1,25 @@
 package bot
 
 import (
-	baseModels "di/models/mongo"
-	"fmt"
-
-	"go.mongodb.org/mongo-driver/v2/bson"
+	baseModels "bot-engine/models/mongo"
 )
 
-type User struct {
+// Bot represents the core business entity for a Telegram Bot.
+type Bot struct {
 	baseModels.BaseModel `bson:",inline"`
 
-	OwnerID bson.ObjectID `json:"owner_id",bson:"owner_id"`
-
-	Name string `json:"name" bson:"name"`
-	Age  int    `json:"age" bson:"age"`
+	OwnerID        string
+	TokenEncrypted string
+	TelegramBotID  int64
+	Username       string
+	Status         BotStatus
+	WebhookURL     string
 }
 
-func (u *User) Validate() error {
+type BotStatus string
 
-	if u.Name == "" {
-		return fmt.Errorf("Name is Required")
-	}
-
-	// if u.Age ==  {
-	// 	return fmt.Errorf("Name is Required")
-	// }
-
-	return nil
-
-}
+const (
+	StatusActive   BotStatus = "active"
+	StatusInactive BotStatus = "inactive"
+	StatusRevoked  BotStatus = "revoked"
+)

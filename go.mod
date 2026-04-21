@@ -1,4 +1,4 @@
-module di
+module bot-engine
 
 go 1.25.4
 

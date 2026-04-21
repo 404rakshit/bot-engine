@@ -3,12 +3,12 @@
 package main
 
 import (
-	"di/db"
-	"di/handlers"
-	middleware "di/middlewares"
-	"di/repositories"
-	"di/routes"
-	"di/services"
+	"bot-engine/db"
+	"bot-engine/handlers"
+	middleware "bot-engine/middlewares"
+	"bot-engine/repositories"
+	"bot-engine/routes"
+	"bot-engine/services"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/wire"

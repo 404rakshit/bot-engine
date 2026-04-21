@@ -1,6 +1,6 @@
 package middleware
 
-import authMiddlewares "di/middlewares/auth"
+import authMiddlewares "bot-engine/middlewares/auth"
 
 type Middlerware struct {
 	AuthMiddleware authMiddlewares.AuthMiddleware
