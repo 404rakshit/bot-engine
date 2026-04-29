@@ -5,10 +5,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"time"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 type Bot = botModels.Bot
@@ -27,8 +29,39 @@ func NewBotRepository(db *mongo.Database) *botRepository {
 
 	col := db.Collection("bots")
 
-	return &botRepository{
+	repo := &botRepository{
 		Collection: col,
+	}
+
+	repo.ensureIndexes()
+
+	return repo
+}
+
+// ensureIndexes builds the required MongoDB indexes for the bot collection
+func (r *botRepository) ensureIndexes() {
+	// Give it a 10-second timeout so it doesn't block startup forever if the DB is slow
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	// 1. Define the Index Model
+	indexModel := mongo.IndexModel{
+		// Set the field to index, and "1" for ascending order
+		Keys: bson.D{{Key: "telegram_bot_id", Value: 1}},
+
+		// 2. Enforce the Unique constraint
+		Options: options.Index().SetUnique(true),
+	}
+
+	// 3. Execute the creation
+	_, err := r.Collection.Indexes().CreateOne(ctx, indexModel)
+	if err != nil {
+		// We use log.Printf instead of panic here. If an index fails to build,
+		// you usually want the app to still boot so you can investigate,
+		// but you want a loud warning in your logs.
+		log.Printf("WARNING: Failed to create unique index for telegram_bot_id: %v\n", err)
+	} else {
+		log.Println("Successfully verified unique index on telegram_bot_id")
 	}
 }
 
