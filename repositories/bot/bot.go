@@ -3,6 +3,7 @@ package bot
 import (
 	botModels "bot-engine/models/mongo/bot"
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -15,6 +16,7 @@ type Bot = botModels.Bot
 type BotRepository interface {
 	Create(ctx context.Context, bot *Bot) error
 	GetByOwnerID(ctx context.Context, ownerID string) ([]Bot, error)
+	GetByTelegramID(ctx context.Context, telegramID int64) (*Bot, error)
 }
 
 type botRepository struct {
@@ -77,4 +79,20 @@ func (r *botRepository) Create(ctx context.Context, data *Bot) error {
 	data.ID = ID
 
 	return nil
+}
+
+func (r *botRepository) GetByTelegramID(ctx context.Context, telegramID int64) (*Bot, error) {
+	var bot Bot
+
+	filter := bson.D{{Key: "telegram_bot_id", Value: telegramID}}
+
+	err := r.Collection.FindOne(ctx, filter).Decode(&bot)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return &bot, nil
 }

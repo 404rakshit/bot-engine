@@ -61,6 +61,16 @@ func (s *botService) ConnectNewBot(ctx context.Context, ownerID string, rawToken
 		return nil, errors.New("failed to verify telegram token: " + err.Error())
 	}
 
+	existingBot, err := s.botRepo.GetByTelegramID(ctx, telegramBotID)
+	if err != nil {
+		return nil, errors.New("internal error checking for duplicate bots")
+	}
+
+	if existingBot != nil {
+		// Bot exists! Reject the request.
+		return nil, errors.New("this telegram bot is already connected to the system")
+	}
+
 	encryptedToken, err := s.encryptionService.Encrypt(rawToken)
 	if err != nil {
 		return nil, errors.New(err.Error())
