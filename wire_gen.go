@@ -7,6 +7,7 @@
 package main
 
 import (
+	"bot-engine/config"
 	"bot-engine/db"
 	"bot-engine/handlers"
 	"bot-engine/middlewares"
@@ -22,7 +23,12 @@ import (
 func InitializeAPI(client *mongo.Client) (*gin.Engine, error) {
 	database := db.NewMongoDatabase(client)
 	repositoriesRepositories := repositories.NewRepositories(database)
-	servicesServices := services.NewServices(repositoriesRepositories)
+	secretsConfig, err := config.NewSecretsConfig()
+	if err != nil {
+		return nil, err
+	}
+	botSecretsConfig := config.ProvideBotSecrets(secretsConfig)
+	servicesServices := services.NewServices(repositoriesRepositories, botSecretsConfig)
 	handlersHandlers := handlers.NewHandler(servicesServices)
 	middlerware := middleware.NewMiddlerware()
 	engine := routes.NewRouter(handlersHandlers, middlerware)

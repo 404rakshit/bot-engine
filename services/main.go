@@ -1,6 +1,7 @@
 package services
 
 import (
+	"bot-engine/config"
 	"bot-engine/repositories"
 	"bot-engine/services/bot"
 	"bot-engine/services/encryption"
@@ -15,10 +16,10 @@ type Services struct {
 	TelegramService   telegram.TelegramService
 }
 
-func NewServices(r *repositories.Repositories) *Services {
+func NewServices(r *repositories.Repositories, botCfg *config.BotSecretsConfig) *Services {
 	// 1. Instantiate the standalone services first (the ones with no service dependencies)
 	// You might need to pass environment variables here later (like your AES key)
-	encService := encryption.NewEncryptionService()
+	encService := encryption.NewEncryptionService(botCfg)
 	tgService := telegram.NewTelegramService()
 
 	// 2. Instantiate the bot service, injecting the repository AND the services we just created

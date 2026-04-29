@@ -2,13 +2,18 @@ package main
 
 import (
 	"bot-engine/clients"
+	"bot-engine/config"
+	"bot-engine/utils"
 	"log"
 )
 
 func main() {
-	log.Println("Just Print")
 
-	client, err := clients.GetMongoClient()
+	utils.LoadEnv(".env")
+
+	mongoUri := config.GetMongoConfig()
+
+	client, err := clients.GetMongoClient(mongoUri)
 
 	if err != nil {
 		log.Fatal(err)

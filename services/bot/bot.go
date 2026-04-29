@@ -63,7 +63,7 @@ func (s *botService) ConnectNewBot(ctx context.Context, ownerID string, rawToken
 
 	encryptedToken, err := s.encryptionService.Encrypt(rawToken)
 	if err != nil {
-		return nil, errors.New("internal server error: failed to secure token")
+		return nil, errors.New(err.Error())
 	}
 
 	ownerIDObj, err := bson.ObjectIDFromHex(ownerID)

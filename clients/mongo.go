@@ -1,9 +1,6 @@
 package clients
 
 import (
-	"fmt"
-	"log"
-	"os"
 	"sync"
 
 	"go.mongodb.org/mongo-driver/v2/mongo"
@@ -19,23 +16,9 @@ var (
 	mongoOnce sync.Once
 )
 
-// GetMongoClient returns the singleton instance of the MongoDB client.
-// It initializes the connection lazily on the first call.
-func GetMongoClient() (*mongo.Client, error) {
+func GetMongoClient(uri string) (*mongo.Client, error) {
 	// once.Do guarantees the function inside is executed only once
 	mongoOnce.Do(func() {
-		uri := os.Getenv("MONGODB_URI")
-
-		if uri == "" {
-			uri = "mongodb://localhost:27017"
-		}
-
-		log.Print(uri)
-		if uri == "" {
-			clientError = fmt.Errorf("set your 'MONGODB_URI' environment variable. See: usage-examples/#environment-variable")
-			return
-		}
-
 		// Connect to MongoDB
 		// Note: In a real app, you might want to add a context with timeout here
 		client, err := mongo.Connect(options.Client().ApplyURI(uri))

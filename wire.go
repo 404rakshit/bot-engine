@@ -3,6 +3,7 @@
 package main
 
 import (
+	"bot-engine/config"
 	"bot-engine/db"
 	"bot-engine/handlers"
 	middleware "bot-engine/middlewares"
@@ -18,6 +19,7 @@ import (
 func InitializeAPI(client *mongo.Client) (*gin.Engine, error) {
 
 	wire.Build(
+		config.ConfigSet,
 
 		db.NewMongoDatabase,
 
