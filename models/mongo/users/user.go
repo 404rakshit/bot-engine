@@ -18,6 +18,10 @@ func (u *User) Validate() error {
 		return fmt.Errorf("Name is Required")
 	}
 
+	if u.Age > 100 || u.Age < 10 {
+		return fmt.Errorf("Invalid Age")
+	}
+
 	return nil
 
 }

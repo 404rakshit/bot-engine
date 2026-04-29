@@ -9,11 +9,10 @@ package main
 import (
 	"bot-engine/db"
 	"bot-engine/handlers"
+	"bot-engine/middlewares"
 	"bot-engine/repositories"
 	"bot-engine/routes"
 	"bot-engine/services"
-	middleware "di/middlewares"
-
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )

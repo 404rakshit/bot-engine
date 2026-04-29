@@ -14,6 +14,6 @@ func NewHandler(
 	s *services.Services,
 ) *Handlers {
 	return &Handlers{
-		UserHandler: userHandlers.NewUserHandler(s.UserService),
+		UserHandler: userHandlers.NewUserHandler(s.UserService, s.BotService),
 	}
 }
