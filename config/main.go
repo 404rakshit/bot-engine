@@ -29,8 +29,13 @@ type BotSecretsConfig struct {
 	AESEncryptionKey string
 }
 
+type AuthSecretsConfig struct {
+	JWTSecret string
+}
+
 type SecretsConfig struct {
 	Database DatabaseSecretsConfig
+	Auth     AuthSecretsConfig
 	// Redis    RedisSecretsConfig
 	// Auth     AuthSecretsConfig
 	// Files    FilesSecretsConfig
@@ -56,6 +61,9 @@ func NewSecretsConfig() (*SecretsConfig, error) {
 		// Files: FilesSecretsConfig{
 		// 	PublicHMACSecret: utils.GetEnvOrDefault("FILES_PUBLIC_HMAC_SECRET", ""),
 		// },
+		Auth: AuthSecretsConfig{
+			JWTSecret: utils.GetEnvOrDefault("JWT_SECRET", "8baeedf13dcb12dabe8c05cd361df0268"),
+		},
 		Bot: BotSecretsConfig{
 			// 2. Load the 32-byte AES key for encrypting Telegram tokens
 			AESEncryptionKey: utils.GetEnvOrDefault("BOT_AES_ENCRYPTION_KEY", "1234567890"),
@@ -94,8 +102,13 @@ func ProvideDatabaseSecrets(config *SecretsConfig) *DatabaseSecretsConfig {
 	return &config.Database
 }
 
+func ProvideJWTSecrets(config *SecretsConfig) *AuthSecretsConfig {
+	return &config.Auth
+}
+
 var ConfigSet = wire.NewSet(
 	NewSecretsConfig,
 	ProvideBotSecrets,
 	ProvideDatabaseSecrets,
+	ProvideJWTSecrets,
 )

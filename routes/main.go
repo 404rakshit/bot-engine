@@ -4,22 +4,39 @@ import (
 	"bot-engine/handlers"
 	middleware "bot-engine/middlewares"
 	"bot-engine/utils"
+	"fmt"
 	"net/http"
+	"time"
 
+	authRoutes "bot-engine/routes/auth"
 	userRoutes "bot-engine/routes/users"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
+func Logger() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		fmt.Println("Origin Header:", c.GetHeader("Origin"))
+		c.Next()
+	}
+}
+
 func NewRouter(h *handlers.Handlers, m *middleware.Middlerware) *gin.Engine {
 	router := gin.Default()
 	config := cors.Config{
 		AllowOrigins: []string{
-			"http://localhost:3000/",
+			"http://localhost:3000",
+			"https://botapi.expdev.me",
 		},
-		AllowMethods: []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization", "X-Requested-With"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
 	}
+
+	// router.Use(Logger())
 
 	router.Use(cors.New(config))
 
@@ -28,9 +45,14 @@ func NewRouter(h *handlers.Handlers, m *middleware.Middlerware) *gin.Engine {
 		c.JSON(http.StatusOK, response)
 	})
 
-	apiGroup := router.Group("/api")
+	apiGroup := router.Group("/v1")
 
 	apiGroup.Use(m.AuthMiddleware.ValidateRequest())
+
+	{
+		authGroup := apiGroup.Group("/auth")
+		authRoutes.SetupAuthRouters(authGroup, h.AuthHandler)
+	}
 
 	{
 		userGroup := apiGroup.Group("/users")

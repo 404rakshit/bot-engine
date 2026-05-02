@@ -3,6 +3,7 @@ package services
 import (
 	"bot-engine/config"
 	"bot-engine/repositories"
+	"bot-engine/services/auth"
 	"bot-engine/services/bot"
 	"bot-engine/services/encryption"
 	"bot-engine/services/telegram"
@@ -14,13 +15,20 @@ type Services struct {
 	BotService        bot.BotService
 	EncryptionService encryption.EncryptionService
 	TelegramService   telegram.TelegramService
+	AuthService       auth.AuthService
 }
 
-func NewServices(r *repositories.Repositories, botCfg *config.BotSecretsConfig) *Services {
+func NewServices(
+	r *repositories.Repositories,
+	botCfg *config.BotSecretsConfig,
+	authCfg *config.AuthSecretsConfig,
+) *Services {
 	// 1. Instantiate the standalone services first (the ones with no service dependencies)
 	// You might need to pass environment variables here later (like your AES key)
 	encService := encryption.NewEncryptionService(botCfg)
 	tgService := telegram.NewTelegramService()
+
+	authSvc := auth.NewAuthService(r.UserRepository, authCfg.JWTSecret)
 
 	// 2. Instantiate the bot service, injecting the repository AND the services we just created
 	bService := bot.NewBotService(
@@ -38,5 +46,6 @@ func NewServices(r *repositories.Repositories, botCfg *config.BotSecretsConfig) 
 		BotService:        bService,
 		EncryptionService: encService,
 		TelegramService:   tgService,
+		AuthService:       authSvc,
 	}
 }

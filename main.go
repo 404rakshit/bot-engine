@@ -20,6 +20,6 @@ func main() {
 	}
 
 	app, _ := InitializeAPI(client)
-	app.Run(":8080")
+	app.Run(":8000")
 
 }

@@ -3,6 +3,7 @@ package users
 import (
 	userModels "bot-engine/models/mongo/users"
 	"context"
+	"errors"
 	"time"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
@@ -14,6 +15,7 @@ type userModel = userModels.User
 type UserRepository interface {
 	List(ctx context.Context) ([]userModel, error)
 	Create(ctx context.Context, data *userModel) error
+	GetByEmail(ctx context.Context, email string) (*userModel, error)
 }
 
 type userRepository struct {
@@ -65,4 +67,28 @@ func (r *userRepository) Create(ctx context.Context, data *userModel) error {
 	data.ID = ID
 
 	return nil
+}
+
+func (r *userRepository) GetByEmail(ctx context.Context, email string) (*userModel, error) {
+	var user userModel
+
+	// Create the BSON filter to search by the email field
+	filter := bson.D{{Key: "email", Value: email}}
+
+	// Execute the query and decode the result into our user struct
+	err := r.Collection.FindOne(ctx, filter).Decode(&user)
+
+	if err != nil {
+		// If the error is specifically that the document doesn't exist,
+		// we return nil for the user and nil for the error.
+		// This makes it easy for the service layer to check `if user == nil`.
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, nil
+		}
+
+		// Return any other actual database/connection errors
+		return nil, err
+	}
+
+	return &user, nil
 }

@@ -8,14 +8,14 @@ import (
 
 func SetupUserRouters(router *gin.RouterGroup, handler *userHandler.UserHandler) {
 
-	router.GET("/", handler.List)
+	router.GET("", handler.List)
 
-	router.POST("/", handler.Create)
+	router.POST("", handler.Create)
 
 	{
 		botGroup := router.Group("/:user_id/bots")
-		botGroup.GET("/", handler.ListUserBots)
-		botGroup.POST("/", handler.CreateUserBot)
+		botGroup.GET("", handler.ListUserBots)
+		botGroup.POST("", handler.CreateUserBot)
 	}
 
 }
