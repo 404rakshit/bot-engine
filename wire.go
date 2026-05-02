@@ -29,7 +29,7 @@ func InitializeAPI(client *mongo.Client) (*gin.Engine, error) {
 
 		handlers.NewHandler,
 
-		middleware.NewMiddlerware,
+		middleware.NewMiddlewares,
 
 		routes.NewRouter,
 	)

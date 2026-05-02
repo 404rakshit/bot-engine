@@ -1,10 +1,10 @@
 package auth
 
 import (
-	"context"
 	"net/http"
+	"os"
 
-	userModels "bot-engine/models/mongo/users"
+	authServices "bot-engine/services/auth"
 	"bot-engine/utils"
 
 	"github.com/gin-gonic/gin"
@@ -22,12 +22,7 @@ type LoginRequest struct {
 	Password string `json:"password" binding:"required"`
 }
 
-// 2. Define the contract for the Service Layer
-// This keeps the handler completely decoupled from bcrypt and JWT logic
-type AuthService interface {
-	Signup(ctx context.Context, name, email, password string) (*userModels.User, error)
-	Login(ctx context.Context, email, password string) (string, *userModels.User, error) // Returns a JWT token and the User
-}
+type AuthService = authServices.AuthService
 
 type AuthHandler struct {
 	AuthService AuthService
@@ -37,6 +32,23 @@ func NewAuthHandler(authService AuthService) *AuthHandler {
 	return &AuthHandler{
 		AuthService: authService,
 	}
+}
+
+type CustomeUserResponse struct {
+	UserID string `json:"user_id"`
+	Email  string `json:"email"`
+}
+
+func setAuthCookie(c *gin.Context, token string) {
+	isProduction := os.Getenv("GO_ENV") == "production"
+
+	if isProduction {
+		c.SetSameSite(http.SameSiteNoneMode)
+	} else {
+		c.SetSameSite(http.SameSiteLaxMode)
+	}
+
+	c.SetCookie("auth_token", token, 259200, "/", "", isProduction, true)
 }
 
 // SignupUser handles creating a new account
@@ -51,14 +63,21 @@ func (h *AuthHandler) SignupUser(c *gin.Context) {
 	}
 
 	// Pass to service layer to hash password and save to DB
-	user, err := h.AuthService.Signup(c.Request.Context(), req.Name, req.Email, req.Password)
+	token, user, err := h.AuthService.Signup(c.Request.Context(), req.Name, req.Email, req.Password)
 	if err != nil {
 		response := utils.ErrorResponse(err.Error())
 		c.JSON(http.StatusBadRequest, response)
 		return
 	}
 
-	response := utils.SuccessResponse(user, "User signed up successfully")
+	setAuthCookie(c, token)
+
+	customResponse := CustomeUserResponse{
+		UserID: user.ID.Hex(),
+		Email:  user.Email,
+	}
+
+	response := utils.SuccessResponse(customResponse, "User signed up successfully")
 	c.JSON(http.StatusCreated, response)
 }
 
@@ -82,12 +101,29 @@ func (h *AuthHandler) LoginUser(c *gin.Context) {
 		return
 	}
 
-	// Bundle the token and user data into a single response map
-	data := map[string]interface{}{
-		"token": token,
-		"user":  user,
+	setAuthCookie(c, token)
+
+	customResponse := CustomeUserResponse{
+		UserID: user.ID.Hex(),
+		Email:  user.Email,
 	}
 
-	response := utils.SuccessResponse(data, "Login successful")
+	response := utils.SuccessResponse(customResponse, "Login successful")
+	c.JSON(http.StatusOK, response)
+}
+
+func (h *AuthHandler) LogoutUser(c *gin.Context) {
+	isProduction := os.Getenv("GO_ENV") == "production"
+
+	if isProduction {
+		c.SetSameSite(http.SameSiteNoneMode)
+	} else {
+		c.SetSameSite(http.SameSiteLaxMode)
+	}
+
+	// MaxAge -1 deletes the cookie
+	c.SetCookie("auth_token", "", -1, "/", "", isProduction, true)
+
+	response := utils.SuccessResponse(nil, "Logged out successfully")
 	c.JSON(http.StatusOK, response)
 }

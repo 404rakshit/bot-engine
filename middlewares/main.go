@@ -1,13 +1,18 @@
 package middleware
 
-import authMiddlewares "bot-engine/middlewares/auth"
+import (
+	"bot-engine/config"
+	"bot-engine/middlewares/auth"
+	authMiddlewares "bot-engine/middlewares/auth"
+)
 
-type Middlerware struct {
+type Middlewares struct {
 	AuthMiddleware authMiddlewares.AuthMiddleware
 }
 
-func NewMiddlerware() *Middlerware {
-	return &Middlerware{
-		AuthMiddleware: authMiddlewares.NewAuthMiddleware(),
+func NewMiddlewares(cfg *config.AuthSecretsConfig) *Middlewares {
+	return &Middlewares{
+		// Pass the JWT secret from your config
+		AuthMiddleware: auth.NewAuthMiddleware(cfg.JWTSecret),
 	}
 }

@@ -22,7 +22,7 @@ func Logger() gin.HandlerFunc {
 	}
 }
 
-func NewRouter(h *handlers.Handlers, m *middleware.Middlerware) *gin.Engine {
+func NewRouter(h *handlers.Handlers, m *middleware.Middlewares) *gin.Engine {
 	router := gin.Default()
 	config := cors.Config{
 		AllowOrigins: []string{
@@ -47,12 +47,12 @@ func NewRouter(h *handlers.Handlers, m *middleware.Middlerware) *gin.Engine {
 
 	apiGroup := router.Group("/v1")
 
-	apiGroup.Use(m.AuthMiddleware.ValidateRequest())
-
 	{
 		authGroup := apiGroup.Group("/auth")
 		authRoutes.SetupAuthRouters(authGroup, h.AuthHandler)
 	}
+
+	apiGroup.Use(m.AuthMiddleware.ValidateRequest())
 
 	{
 		userGroup := apiGroup.Group("/users")
