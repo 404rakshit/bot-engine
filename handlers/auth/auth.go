@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"os"
 
+	"bot-engine/config"
 	authServices "bot-engine/services/auth"
 	"bot-engine/utils"
 
@@ -26,11 +27,13 @@ type AuthService = authServices.AuthService
 
 type AuthHandler struct {
 	AuthService AuthService
+	BotCfg      *config.BotSecretsConfig
 }
 
-func NewAuthHandler(authService AuthService) *AuthHandler {
+func NewAuthHandler(authService AuthService, botCfg *config.BotSecretsConfig) *AuthHandler {
 	return &AuthHandler{
 		AuthService: authService,
+		BotCfg:      botCfg,
 	}
 }
 

@@ -6,6 +6,7 @@ import (
 
 	"bot-engine/helper"
 	userModels "bot-engine/models/mongo/users"
+
 	userRepos "bot-engine/repositories/users"
 
 	"golang.org/x/crypto/bcrypt"
@@ -15,17 +16,24 @@ import (
 type AuthService interface {
 	Signup(ctx context.Context, name, email, password string) (string, *userModels.User, error)
 	Login(ctx context.Context, email, password string) (string, *userModels.User, error)
+	ProcessTelegramLogin(ctx context.Context, tgPayload TelegramAuthPayload) (string, error, string)
 }
 
 type authService struct {
-	userRepo  userRepos.UserRepository
-	jwtSecret []byte
+	userRepo     userRepos.UserRepository
+	identityRepo userRepos.IdentityRepository
+	jwtSecret    []byte
 }
 
-func NewAuthService(userRepo userRepos.UserRepository, jwtSecret string) AuthService {
+func NewAuthService(
+	userRepo userRepos.UserRepository,
+	identityRepo userRepos.IdentityRepository,
+	jwtSecret string,
+) AuthService {
 	return &authService{
-		userRepo:  userRepo,
-		jwtSecret: []byte(jwtSecret),
+		userRepo:     userRepo,
+		identityRepo: identityRepo,
+		jwtSecret:    []byte(jwtSecret),
 	}
 }
 

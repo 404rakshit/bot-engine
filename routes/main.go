@@ -28,6 +28,7 @@ func NewRouter(h *handlers.Handlers, m *middleware.Middlewares) *gin.Engine {
 		AllowOrigins: []string{
 			"http://localhost:3000",
 			"https://botapi.expdev.me",
+			"https://share.expdev.me",
 		},
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization", "X-Requested-With"},

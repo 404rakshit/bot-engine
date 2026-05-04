@@ -8,13 +8,15 @@ import (
 )
 
 type Repositories struct {
-	UserRepository users.UserRepository
-	BotRepository  bot.BotRepository
+	UserRepository     users.UserRepository
+	IdentityRepository users.IdentityRepository
+	BotRepository      bot.BotRepository
 }
 
 func NewRepositories(db *mongo.Database) *Repositories {
 	return &Repositories{
-		UserRepository: users.NewUserRepository(db),
-		BotRepository:  bot.NewBotRepository(db),
+		UserRepository:     users.NewUserRepository(db),
+		BotRepository:      bot.NewBotRepository(db),
+		IdentityRepository: users.NewIdentityRepository(db),
 	}
 }

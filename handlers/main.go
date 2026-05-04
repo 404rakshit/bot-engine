@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"bot-engine/config"
 	"bot-engine/services"
 
 	authHandlers "bot-engine/handlers/auth"
@@ -14,9 +15,10 @@ type Handlers struct {
 
 func NewHandler(
 	s *services.Services,
+	botCfg *config.BotSecretsConfig,
 ) *Handlers {
 	return &Handlers{
 		UserHandler: userHandlers.NewUserHandler(s.UserService, s.BotService),
-		AuthHandler: authHandlers.NewAuthHandler(s.AuthService),
+		AuthHandler: authHandlers.NewAuthHandler(s.AuthService, botCfg),
 	}
 }

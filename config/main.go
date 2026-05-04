@@ -27,6 +27,7 @@ type DatabaseSecretsConfig struct {
 // 1. Added the configuration for our newly created Encryption Service
 type BotSecretsConfig struct {
 	AESEncryptionKey string
+	BotToken         string
 }
 
 type AuthSecretsConfig struct {
@@ -50,7 +51,7 @@ func NewSecretsConfig() (*SecretsConfig, error) {
 
 	config := &SecretsConfig{
 		Database: DatabaseSecretsConfig{
-			MongoURI: utils.GetEnvOrDefault("MONGO_URI", "mongodb://rule-engine-mongo:27017"),
+			MongoURI: utils.GetEnvOrDefault("MONGO_URI", "mongodb://bot-engine-mongo:27017"),
 		},
 		// Redis: RedisSecretsConfig{
 		// 	Password: utils.GetEnvOrDefault("REDIS_PASSWORD", ""),
@@ -62,11 +63,12 @@ func NewSecretsConfig() (*SecretsConfig, error) {
 		// 	PublicHMACSecret: utils.GetEnvOrDefault("FILES_PUBLIC_HMAC_SECRET", ""),
 		// },
 		Auth: AuthSecretsConfig{
-			JWTSecret: utils.GetEnvOrDefault("JWT_SECRET", "8baeedf13dcb12dabe8c05cd361df0268"),
+			JWTSecret: utils.GetEnvOrDefault("JWT_SECRET", "12345678901234567890123456789012"),
 		},
 		Bot: BotSecretsConfig{
 			// 2. Load the 32-byte AES key for encrypting Telegram tokens
 			AESEncryptionKey: utils.GetEnvOrDefault("BOT_AES_ENCRYPTION_KEY", "1234567890"),
+			BotToken:         utils.GetEnvOrDefault("TELEGRAM_BOT_TOKEN", "1234567890"),
 		},
 	}
 

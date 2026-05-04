@@ -28,7 +28,11 @@ func NewServices(
 	encService := encryption.NewEncryptionService(botCfg)
 	tgService := telegram.NewTelegramService()
 
-	authSvc := auth.NewAuthService(r.UserRepository, authCfg.JWTSecret)
+	authSvc := auth.NewAuthService(
+		r.UserRepository,
+		r.IdentityRepository,
+		authCfg.JWTSecret,
+	)
 
 	// 2. Instantiate the bot service, injecting the repository AND the services we just created
 	bService := bot.NewBotService(

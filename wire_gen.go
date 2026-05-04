@@ -30,7 +30,7 @@ func InitializeAPI(client *mongo.Client) (*gin.Engine, error) {
 	botSecretsConfig := config.ProvideBotSecrets(secretsConfig)
 	authSecretsConfig := config.ProvideJWTSecrets(secretsConfig)
 	servicesServices := services.NewServices(repositoriesRepositories, botSecretsConfig, authSecretsConfig)
-	handlersHandlers := handlers.NewHandler(servicesServices)
+	handlersHandlers := handlers.NewHandler(servicesServices, botSecretsConfig)
 	middlewares := middleware.NewMiddlewares(authSecretsConfig)
 	engine := routes.NewRouter(handlersHandlers, middlewares)
 	return engine, nil
