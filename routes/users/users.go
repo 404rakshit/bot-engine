@@ -12,8 +12,9 @@ func SetupUserRouters(router *gin.RouterGroup, handler *userHandler.UserHandler)
 
 	router.POST("", handler.Create)
 
+	botGroup := router.Group("/:user_id/bots")
+
 	{
-		botGroup := router.Group("/:user_id/bots")
 		botGroup.GET("", handler.ListUserBots)
 		botGroup.POST("", handler.CreateUserBot)
 	}

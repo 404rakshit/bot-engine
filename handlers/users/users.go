@@ -72,12 +72,11 @@ func (h *UserHandler) Create(c *gin.Context) {
 }
 
 func (h *UserHandler) ListUserBots(c *gin.Context) {
-	// 1. Identify the tenant.
-	// Assuming an Auth Middleware sets "user_id" in the Gin context.
-	// If you use URL params (e.g., /users/:id/bots), use c.Param("id") instead.
-	ownerID := c.Param("user_id")
+	// 1. Identify the tenant from the Gin context (set by AuthMiddleware)
+	ownerID := c.GetString("user_id")
 
 	if ownerID == "" {
+		// Defensive programming: middleware should catch this, but we double-check
 		c.JSON(http.StatusUnauthorized, utils.ErrorResponse("Unauthorized user"))
 		return
 	}
@@ -92,7 +91,6 @@ func (h *UserHandler) ListUserBots(c *gin.Context) {
 
 	// 3. Ensure we return an empty array `[]` in JSON instead of `null`
 	if bots == nil {
-		// Assuming botServices.Bot is your returned entity type
 		bots = make([]botServices.Bot, 0)
 	}
 
@@ -101,8 +99,8 @@ func (h *UserHandler) ListUserBots(c *gin.Context) {
 }
 
 func (h *UserHandler) CreateUserBot(c *gin.Context) {
-	// 1. Identify the tenant making the request
-	ownerID := c.Param("user_id")
+	// 1. Identify the tenant from the Gin context
+	ownerID := c.GetString("user_id")
 	if ownerID == "" {
 		c.JSON(http.StatusUnauthorized, utils.ErrorResponse("Unauthorized user"))
 		return
@@ -116,17 +114,15 @@ func (h *UserHandler) CreateUserBot(c *gin.Context) {
 		return
 	}
 
-	// 3. Pass the data to the domain layer (orchestrating verification & encryption)
+	// 3. Pass the data to the domain layer
 	createdBot, err := h.BotService.ConnectNewBot(c.Request.Context(), ownerID, req.Token)
 
 	if err != nil {
-		// You might want to parse specific domain errors here (e.g., 400 for invalid token vs 500 for db failure)
 		response := utils.ErrorResponse(err.Error())
 		c.JSON(http.StatusBadRequest, response)
 		return
 	}
 
-	// 4. Return the successfully created bot entity (without the raw token)
 	response := utils.SuccessResponse(createdBot, "Bot successfully connected")
-	c.JSON(http.StatusCreated, response) // 201 Created is the standard here
+	c.JSON(http.StatusCreated, response)
 }

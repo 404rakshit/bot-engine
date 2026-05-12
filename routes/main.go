@@ -10,6 +10,7 @@ import (
 
 	authRoutes "bot-engine/routes/auth"
 	userRoutes "bot-engine/routes/users"
+	webhookRoutes "bot-engine/routes/wehook"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -47,6 +48,11 @@ func NewRouter(h *handlers.Handlers, m *middleware.Middlewares) *gin.Engine {
 	})
 
 	apiGroup := router.Group("/v1")
+
+	{
+		webhookGroup := apiGroup.Group("/webhooks")
+		webhookRoutes.RegisterRoutes(webhookGroup, h.WebhookHandler)
+	}
 
 	{
 		authGroup := apiGroup.Group("/auth")

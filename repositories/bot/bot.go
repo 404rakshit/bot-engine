@@ -19,6 +19,7 @@ type BotRepository interface {
 	Create(ctx context.Context, bot *Bot) error
 	GetByOwnerID(ctx context.Context, ownerID string) ([]Bot, error)
 	GetByTelegramID(ctx context.Context, telegramID int64) (*Bot, error)
+	GetByWebhookToken(ctx context.Context, token string) (*botModels.Bot, error)
 }
 
 type botRepository struct {
@@ -63,6 +64,15 @@ func (r *botRepository) ensureIndexes() {
 	} else {
 		log.Println("Successfully verified unique index on telegram_bot_id")
 	}
+}
+
+func (r *botRepository) GetByWebhookToken(ctx context.Context, token string) (*botModels.Bot, error) {
+	var b botModels.Bot
+	err := r.Collection.FindOne(ctx, bson.M{"webhook_token": token, "status": "active"}).Decode(&b)
+	if err != nil {
+		return nil, err
+	}
+	return &b, nil
 }
 
 func (r *botRepository) GetByOwnerID(ctx context.Context, ownerID string) ([]Bot, error) {

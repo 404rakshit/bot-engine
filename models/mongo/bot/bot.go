@@ -10,12 +10,15 @@ import (
 type Bot struct {
 	baseModels.BaseModel `bson:",inline" json:",inline"`
 
-	OwnerID        bson.ObjectID `bson:"owner_id" json:"owner_id,omitempty"`
-	TokenEncrypted string        `bson:"token_encrypted" json:"token_encrypted"`
-	TelegramBotID  int64         `bson:"telegram_bot_id" json:"telegram_bot_id"`
-	Username       string        `bson:"username" json:"username"`
-	Status         BotStatus     `bson:"status" json:"status"`
-	WebhookURL     string        `bson:"webhook_url" json:"webhook_url"`
+	OwnerID bson.ObjectID `bson:"owner_id" json:"owner_id,omitempty"`
+
+	TokenEncrypted string `bson:"token_encrypted" json:"-"`
+	WebhookToken   string `bson:"webhook_token" json:"webhook_token"`
+
+	TelegramBotID int64     `bson:"telegram_bot_id" json:"telegram_bot_id"`
+	Username      string    `bson:"username" json:"username"`
+	Status        BotStatus `bson:"status" json:"status"`
+	WebhookURL    string    `bson:"webhook_url" json:"webhook_url"`
 }
 
 type BotStatus string

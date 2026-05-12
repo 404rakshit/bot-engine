@@ -43,15 +43,31 @@ type CustomeUserResponse struct {
 }
 
 func setAuthCookie(c *gin.Context, token string) {
-	isProduction := os.Getenv("GO_ENV") == "production"
+	// isProduction := os.Getenv("GO_ENV") == "production"
 
-	if isProduction {
-		c.SetSameSite(http.SameSiteNoneMode)
-	} else {
-		c.SetSameSite(http.SameSiteLaxMode)
+	// Construct the cookie explicitly using Go's standard library
+	cookie := &http.Cookie{
+		Name:     "auth_token",
+		Value:    token,
+		MaxAge:   259200,
+		Path:     "/",
+		Domain:   "",
+		HttpOnly: true,
+		Secure:   true,                  // MUST be true
+		SameSite: http.SameSiteNoneMode, // MUST be None
 	}
 
-	c.SetCookie("auth_token", token, 259200, "/", "", isProduction, true)
+	http.SetCookie(c.Writer, cookie)
+
+	// // Explicitly set the SameSite mode
+	// if isProduction {
+	// 	cookie.SameSite = http.SameSiteNoneMode
+	// } else {
+	// 	cookie.SameSite = http.SameSiteLaxMode
+	// }
+
+	// // Write the cookie to the response
+	// http.SetCookie(c.Writer, cookie)
 }
 
 // SignupUser handles creating a new account

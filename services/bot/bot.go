@@ -7,7 +7,9 @@ import (
 	"bot-engine/services/telegram"
 	"context"
 	"errors"
+	"fmt"
 
+	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
@@ -22,20 +24,23 @@ type Bot = botModels.Bot
 type BotService interface {
 	GetBotsByOwnerID(ctx context.Context, ownerID string) ([]Bot, error)
 	ConnectNewBot(ctx context.Context, ownerID string, rawToken string) (*Bot, error)
+	GetActiveBotByWebhook(ctx context.Context, webhookToken string) (*botModels.Bot, string, error)
 }
 
 type botService struct {
 	botRepo           botRepo
 	telegramService   TelegramService
 	encryptionService EncryptionService
+	botWebhookService WebhookRegistrar
 }
 
 // NewBotService injects the database repository and external services (used by Wire)
-func NewBotService(br botRepo, ts TelegramService, es EncryptionService) BotService {
+func NewBotService(br botRepo, ts TelegramService, es EncryptionService, bw WebhookRegistrar) BotService {
 	return &botService{
 		botRepo:           br,
 		telegramService:   ts,
 		encryptionService: es,
+		botWebhookService: bw,
 	}
 }
 
@@ -53,22 +58,22 @@ func (s *botService) GetBotsByOwnerID(ctx context.Context, ownerID string) ([]Bo
 func (s *botService) ConnectNewBot(ctx context.Context, ownerID string, rawToken string) (*Bot, error) {
 
 	if rawToken == "" {
-		return nil, errors.New("telegram token cannot be empty")
+		return nil, errors.New("Telegram token cannot be empty")
 	}
 
 	username, telegramBotID, err := s.telegramService.VerifyToken(ctx, rawToken)
 	if err != nil {
-		return nil, errors.New("failed to verify telegram token: " + err.Error())
+		return nil, errors.New("Failed to verify telegram token: " + err.Error())
 	}
 
 	existingBot, err := s.botRepo.GetByTelegramID(ctx, telegramBotID)
 	if err != nil {
-		return nil, errors.New("internal error checking for duplicate bots")
+		return nil, errors.New("Internal error checking for duplicate bots")
 	}
 
 	if existingBot != nil {
 		// Bot exists! Reject the request.
-		return nil, errors.New("this telegram bot is already connected to the system")
+		return nil, errors.New("This telegram bot is already connected to the system")
 	}
 
 	encryptedToken, err := s.encryptionService.Encrypt(rawToken)
@@ -81,12 +86,15 @@ func (s *botService) ConnectNewBot(ctx context.Context, ownerID string, rawToken
 		return nil, errors.New("id convertion issue: failed to convert into objectID")
 	}
 
+	webhookToken := uuid.New().String()
+
 	// 3. Construct the Bot entity
 	newBot := &Bot{
 		OwnerID:        ownerIDObj,
 		TokenEncrypted: encryptedToken,
 		TelegramBotID:  telegramBotID,
 		Username:       username,
+		WebhookToken:   webhookToken,
 		Status:         "active",
 	}
 
@@ -100,6 +108,28 @@ func (s *botService) ConnectNewBot(ctx context.Context, ownerID string, rawToken
 		return nil, err
 	}
 
+	// Note: Replace with your actual domain name!
+	systemWebhookURL := fmt.Sprintf("https://bot.expdev.me/v1/webhooks/%s", webhookToken)
+
+	if err := s.botWebhookService.Register(rawToken, systemWebhookURL); err != nil {
+		return nil, fmt.Errorf("bot saved but failed to register with Telegram: %w", err)
+	}
 	// 6. Return the created bot (Ensure your handler strips the encrypted token before sending JSON)
 	return newBot, nil
+}
+
+func (s *botService) GetActiveBotByWebhook(ctx context.Context, webhookToken string) (*botModels.Bot, string, error) {
+	// 1. Fetch bot using repository
+	botDoc, err := s.botRepo.GetByWebhookToken(ctx, webhookToken)
+	if err != nil {
+		return nil, "", fmt.Errorf("bot not found or inactive: %w", err)
+	}
+
+	// 2. Decrypt the bot token within the safety of the service layer
+	rawToken, err := s.encryptionService.Decrypt(botDoc.TokenEncrypted)
+	if err != nil {
+		return nil, "", fmt.Errorf("failed to decrypt bot token: %w", err)
+	}
+
+	return botDoc, rawToken, nil
 }

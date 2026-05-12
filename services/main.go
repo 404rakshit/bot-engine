@@ -6,6 +6,7 @@ import (
 	"bot-engine/services/auth"
 	"bot-engine/services/bot"
 	"bot-engine/services/encryption"
+	"bot-engine/services/engine"
 	"bot-engine/services/telegram"
 	"bot-engine/services/users"
 )
@@ -16,6 +17,8 @@ type Services struct {
 	EncryptionService encryption.EncryptionService
 	TelegramService   telegram.TelegramService
 	AuthService       auth.AuthService
+	EngineService     engine.EngineService
+	WebhookRegistrar  bot.WebhookRegistrar
 }
 
 func NewServices(
@@ -34,15 +37,20 @@ func NewServices(
 		authCfg.JWTSecret,
 	)
 
+	botWebhookService := bot.NewWebhookRegistrar()
+
 	// 2. Instantiate the bot service, injecting the repository AND the services we just created
 	bService := bot.NewBotService(
 		r.BotRepository,
 		tgService,  // Injected instance
 		encService, // Injected instance
+		botWebhookService,
 	)
 
 	// 3. Instantiate the user service
 	uService := users.NewUserService(r.UserRepository)
+
+	engineSvc := engine.NewEngineService(r.EngineRepository)
 
 	// 4. Return the aggregated struct containing all fully-wired instances
 	return &Services{
@@ -51,5 +59,7 @@ func NewServices(
 		EncryptionService: encService,
 		TelegramService:   tgService,
 		AuthService:       authSvc,
+		WebhookRegistrar:  botWebhookService,
+		EngineService:     engineSvc,
 	}
 }
